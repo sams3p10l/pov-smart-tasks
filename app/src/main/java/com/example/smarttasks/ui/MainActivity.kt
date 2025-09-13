@@ -1,4 +1,4 @@
-package com.example.smarttasks
+package com.example.smarttasks.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
