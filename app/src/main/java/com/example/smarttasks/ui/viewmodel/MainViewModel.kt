@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val getTasksUseCase: GetTasksUseCase,
+    getTasksUseCase: GetTasksUseCase,
 ) : ViewModel() {
     private val _tasks = MutableStateFlow<List<TaskUiModel>>(emptyList())
     val tasks: StateFlow<List<TaskUiModel>?> =
