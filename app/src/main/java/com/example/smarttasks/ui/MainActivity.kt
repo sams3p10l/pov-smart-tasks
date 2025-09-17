@@ -12,6 +12,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.smarttasks.ui.composable.SplashScreen
+import com.example.smarttasks.ui.composable.TaskDetailsScreen
 import com.example.smarttasks.ui.composable.TasksScreen
 import com.example.smarttasks.ui.model.Screen
 import com.example.smarttasks.ui.theme.SmartTasksTheme
@@ -43,8 +44,16 @@ class MainActivity : ComponentActivity() {
                                 mainViewModel.navigateTo(Screen.Tasks)
                             }
                         )
-                        Screen.Tasks -> TasksScreen()
-                        else -> Unit
+                        Screen.Tasks -> TasksScreen(
+                            onCardClick = {
+                                mainViewModel.navigateTo(Screen.TaskDetails)
+                            }
+                        )
+                        Screen.TaskDetails -> TaskDetailsScreen(
+                            onBack = {
+                                mainViewModel.navigateTo(Screen.Tasks)
+                            }
+                        )
                     }
                 }
             }

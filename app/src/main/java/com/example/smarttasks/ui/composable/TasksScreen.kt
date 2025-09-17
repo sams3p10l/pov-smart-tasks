@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,6 +23,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,7 +48,8 @@ import com.example.smarttasks.ui.viewmodel.TasksViewModel
 
 @Composable
 fun TasksScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCardClick: () -> Unit,
 ) {
     val viewModel: TasksViewModel = hiltViewModel()
     val uiState: State<TaskScreenUiModel> = viewModel.uiState.collectAsState()
@@ -86,7 +88,10 @@ fun TasksScreen(
         if (data.tasks.isNotEmpty()) {
             LazyColumn {
                 items(data.tasks.size) {
-                    TaskCard(data.tasks[it])
+                    TaskCard(
+                        uiData = data.tasks[it],
+                        onClick = onCardClick
+                    )
                     Spacer(Modifier.height(PaddingMedium))
                 }
             }
@@ -110,12 +115,14 @@ fun TasksScreen(
 @Composable
 fun TaskCard(
     uiData: TaskUiModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = CardHeightMin),
+            .defaultMinSize(minHeight = CardHeightMin)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(CornerRadius)
     ) {
         Column(
@@ -127,41 +134,54 @@ fun TaskCard(
                 color = Red
             )
             Spacer(Modifier.height(PaddingSmall))
-            Divider() //todo set correct color
+            HorizontalDivider() //todo set correct color
             Spacer(Modifier.height(PaddingMedium))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Due date",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                if (uiData.daysLeft.isNotNegative()) {
-                    Text(
-                        text = "Days left",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-            Spacer(Modifier.height(PaddingSmall))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = uiData.dueDate,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Red
-                )
-                if (uiData.daysLeft.isNotNegative()) {
-                    Text(
-                        text = uiData.daysLeft,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Red
-                    )
-                }
-            }
+            RowDueDate(
+                dueDate = uiData.dueDate,
+                daysLeft = uiData.daysLeft,
+                accentColor = Red
+            )
+        }
+    }
+}
+
+@Composable
+fun RowDueDate(
+    dueDate: String,
+    daysLeft: String,
+    accentColor: Color
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "Due date",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        if (daysLeft.isNotNegative()) {
+            Text(
+                text = "Days left",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+    Spacer(Modifier.height(PaddingSmall))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = dueDate,
+            style = MaterialTheme.typography.titleLarge,
+            color = accentColor
+        )
+        if (daysLeft.isNotNegative()) {
+            Text(
+                text = daysLeft,
+                style = MaterialTheme.typography.titleLarge,
+                color = accentColor
+            )
         }
     }
 }
@@ -176,7 +196,8 @@ fun TaskCardPreview() {
                 "",
                 dueDate = "Apr 23 2016",
                 daysLeft = "12"
-            )
+            ),
+            onClick = {}
         )
     }
 }
