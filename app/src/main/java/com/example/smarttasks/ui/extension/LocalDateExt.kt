@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
-fun LocalDate.formatTo(pattern: String): String {
+fun LocalDate.prettify(pattern: String = "MMM dd yyyy"): String {
     val formatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
     return this.format(formatter)
 }

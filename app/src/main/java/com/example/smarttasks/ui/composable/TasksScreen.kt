@@ -2,6 +2,7 @@ package com.example.smarttasks.ui.composable
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,24 +21,26 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.smarttasks.R
+import com.example.smarttasks.ui.model.TaskScreenUiModel
 import com.example.smarttasks.ui.model.TaskUiModel
 import com.example.smarttasks.ui.theme.CardHeightMin
 import com.example.smarttasks.ui.theme.CornerRadius
+import com.example.smarttasks.ui.theme.Headline
 import com.example.smarttasks.ui.theme.PaddingExtraLarge
 import com.example.smarttasks.ui.theme.PaddingLarge
 import com.example.smarttasks.ui.theme.PaddingMedium
 import com.example.smarttasks.ui.theme.PaddingSmall
 import com.example.smarttasks.ui.theme.Red
 import com.example.smarttasks.ui.theme.SmartTasksTheme
+import com.example.smarttasks.ui.theme.SpacerExtraLarge
+import com.example.smarttasks.ui.theme.SpacerLarge
+import com.example.smarttasks.ui.theme.TitleExtraLarge
 import com.example.smarttasks.ui.theme.White
 import com.example.smarttasks.ui.theme.Yellow
 import com.example.smarttasks.ui.viewmodel.TasksViewModel
@@ -47,38 +50,59 @@ fun TasksScreen(
     modifier: Modifier = Modifier
 ) {
     val viewModel: TasksViewModel = hiltViewModel()
-    val uiData: State<List<TaskUiModel>> = viewModel.tasks.collectAsState()
-    var date by remember { mutableStateOf("") }
+    val uiState: State<TaskScreenUiModel> = viewModel.uiState.collectAsState()
+    val data: TaskScreenUiModel = uiState.value
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Yellow)
-            .padding(start = PaddingMedium, end = PaddingMedium, top = PaddingLarge)
+            .background(Yellow) //todo replace with MaterialTheme
+            .padding(start = PaddingMedium, end = PaddingMedium, top = PaddingLarge),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
                 painterResource(R.drawable.arrow_left),
-                contentDescription = "Arrow to the left"
+                contentDescription = "Arrow to the left",
+                modifier = Modifier.clickable { viewModel.decrementDate() }
             )
             Text(
-                text = date,
-                color = White
+                text = data.date,
+                style = MaterialTheme.typography.titleLarge,
+                color = White,
+                fontSize = TitleExtraLarge
             )
             Image(
-                painterResource(R.drawable.arrow_right),
-                contentDescription = "Arrow to the right"
+                painter = painterResource(R.drawable.arrow_right),
+                contentDescription = "Arrow to the right",
+                modifier = Modifier.clickable { viewModel.incrementDate() }
             )
         }
         Spacer(Modifier.height(PaddingExtraLarge))
-        LazyColumn {
-            items(uiData.value.size) {
-                TaskCard(uiData.value[it])
-                Spacer(Modifier.height(PaddingMedium))
+        if (data.tasks.isNotEmpty()) {
+            LazyColumn {
+                items(data.tasks.size) {
+                    TaskCard(data.tasks[it])
+                    Spacer(Modifier.height(PaddingMedium))
+                }
             }
+        } else {
+            Spacer(Modifier.height(SpacerExtraLarge))
+            Image(
+                painter = painterResource(R.drawable.empty_screen),
+                contentDescription = "Illustration",
+            )
+            Spacer(Modifier.height(SpacerLarge))
+            Text(
+                text = "No tasks for ${data.date.lowercaseIfNotDate()}!",
+                style = MaterialTheme.typography.titleLarge,
+                color = White,
+                fontSize = Headline
+            )
         }
     }
 }
@@ -103,7 +127,7 @@ fun TaskCard(
                 color = Red
             )
             Spacer(Modifier.height(PaddingSmall))
-            Divider()
+            Divider() //todo set correct color
             Spacer(Modifier.height(PaddingMedium))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -113,11 +137,14 @@ fun TaskCard(
                     text = "Due date",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text(
-                    text = "Days left",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                if (uiData.daysLeft.isNotNegative()) {
+                    Text(
+                        text = "Days left",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
+            Spacer(Modifier.height(PaddingSmall))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -127,11 +154,13 @@ fun TaskCard(
                     style = MaterialTheme.typography.titleLarge,
                     color = Red
                 )
-                Text(
-                    text = uiData.daysLeft,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Red
-                )
+                if (uiData.daysLeft.isNotNegative()) {
+                    Text(
+                        text = uiData.daysLeft,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Red
+                    )
+                }
             }
         }
     }
@@ -151,3 +180,6 @@ fun TaskCardPreview() {
         )
     }
 }
+
+private fun String.isNotNegative() = !this.startsWith("-")
+private fun String.lowercaseIfNotDate() = if (this.any { it.isDigit() }) this else this.lowercase()
