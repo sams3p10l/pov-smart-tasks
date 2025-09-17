@@ -4,5 +4,7 @@ import com.example.smarttasks.domain.model.Task
 import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {
-    fun getTasks(): Flow<List<Task>>
+    fun getTasksByDate(date: String): Flow<List<Task>>
+
+    suspend fun syncTasks()
 }

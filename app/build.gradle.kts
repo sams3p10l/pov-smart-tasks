@@ -69,6 +69,11 @@ dependencies {
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
 
+    val roomVersion = "2.8.0"
+    implementation("androidx.room:room-runtime:${roomVersion}")
+    implementation("androidx.room:room-ktx:${roomVersion}")
+
+    ksp("androidx.room:room-compiler:$roomVersion")
     ksp("com.google.dagger:hilt-android-compiler:2.57.1")
 
     testImplementation("junit:junit:4.13.2")

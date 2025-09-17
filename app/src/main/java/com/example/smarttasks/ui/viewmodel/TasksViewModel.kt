@@ -2,22 +2,25 @@ package com.example.smarttasks.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.smarttasks.domain.usecase.GetTasksUseCase
+import com.example.smarttasks.domain.usecase.GetTasksByDateUseCase
 import com.example.smarttasks.ui.extension.prettify
 import com.example.smarttasks.ui.model.TaskScreenUiModel
 import com.example.smarttasks.ui.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import java.time.LocalDate
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class TasksViewModel @Inject constructor(
-    getTasksUseCase: GetTasksUseCase,
+    private val getTasksByDateUseCase: GetTasksByDateUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(TaskScreenUiModel("", emptyList()))
     val uiState: StateFlow<TaskScreenUiModel> = _uiState
@@ -26,20 +29,7 @@ class TasksViewModel @Inject constructor(
     private val targetDate = MutableStateFlow<LocalDate>(currentDate)
 
     init {
-        combine(getTasksUseCase(), targetDate) { tasks, date ->
-            val filtered = tasks
-                .filter { it.targetDate == date }
-                .map { it.toUiModel() }
-
-            TaskScreenUiModel(
-                date = formatDate(date),
-                tasks = filtered
-            )
-        }
-        .onEach {
-            _uiState.value = it
-        }
-        .launchIn(viewModelScope)
+        buildUiState()
     }
 
     fun incrementDate() {
@@ -48,6 +38,25 @@ class TasksViewModel @Inject constructor(
 
     fun decrementDate() {
         targetDate.value = targetDate.value.minusDays(1)
+    }
+
+    private fun buildUiState() {
+        targetDate
+            .flatMapLatest { date -> //getting latest selected date
+                getTasksByDateUseCase(date).map { tasks -> //fetching tasks for that date
+                    date to tasks //pairing result to current date because we need the date below
+                }
+            }.map { (date, tasks) ->
+                val mapped = tasks.map { it.toUiModel() } //map domain tasks to ui data
+
+                TaskScreenUiModel(
+                    date = formatDate(date),
+                    tasks = mapped
+                )
+            }.onEach {
+                _uiState.value = it //post the value
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun formatDate(targetDate: LocalDate): String {

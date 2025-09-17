@@ -1,10 +1,8 @@
 package com.example.smarttasks.data.remote.model
 
-import com.example.smarttasks.domain.model.Task
+import com.example.smarttasks.data.local.model.TaskEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.time.LocalDate
-import kotlin.time.ExperimentalTime
 
 @Serializable
 data class TaskResponseDto(
@@ -27,12 +25,11 @@ data class TaskDto(
     @SerialName("DueDate") val dueDate: String? = null,
 )
 
-@OptIn(ExperimentalTime::class)
-fun TaskDto.toDomain() = Task(
+fun TaskDto.toEntity() = TaskEntity(
     id = id,
     priority = priority,
     title = title,
-    description = description,
-    targetDate = LocalDate.parse(targetDate),
-    dueDate = dueDate?.let { LocalDate.parse(it) },
+    description = description ?: "",
+    targetDate = targetDate,
+    dueDate = dueDate
 )
