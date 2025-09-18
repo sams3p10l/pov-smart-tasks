@@ -2,6 +2,7 @@ package com.example.smarttasks.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.smarttasks.domain.model.Task
 import com.example.smarttasks.domain.usecase.GetTasksByDateUseCase
 import com.example.smarttasks.ui.extension.prettify
 import com.example.smarttasks.ui.model.TaskScreenUiModel
@@ -47,7 +48,17 @@ class TasksViewModel @Inject constructor(
                     date to tasks //pairing result to current date because we need the date below
                 }
             }.map { (date, tasks) ->
-                val mapped = tasks.map { it.toUiModel() } //map domain tasks to ui data
+                val mapped = tasks
+                    .sortedWith(
+                        compareByDescending<Task> {
+                            it.priority //sort by priority, biggest first
+                        }.thenBy {
+                            it.dueDate //if priority is the same, task with closer due date comes first
+                        }
+                    )
+                    .map {
+                        it.toUiModel() //map domain tasks to ui data
+                    }
 
                 TaskScreenUiModel(
                     date = formatDate(date),
