@@ -91,6 +91,7 @@ fun TaskDetailsScreen(
             }
             is UiState.Success -> {
                 TaskDetailsContent(
+                    modifier = modifier,
                     uiData = uiData.data,
                     onBack = onBack,
                     updateTask = { status, comment ->
@@ -108,7 +109,7 @@ fun TaskDetailsScreen(
 }
 
 @Composable
-private fun TaskDetailsContent(
+fun TaskDetailsContent(
     uiData: TaskDetailsUiModel,
     modifier: Modifier = Modifier,
     updateTask: (TaskStatus, String?) -> Unit,

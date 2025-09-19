@@ -154,7 +154,7 @@ fun TasksList(
 }
 
 @Composable
-fun TaskCard(
+private fun TaskCard(
     uiData: TaskScreenUiModel.TaskUi,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
@@ -244,7 +244,7 @@ fun RowDueDate(
 
 @Preview
 @Composable
-fun TaskCardPreview() {
+private fun TaskCardPreview() {
     SmartTasksTheme {
         TaskCard(
             TaskScreenUiModel.TaskUi(
