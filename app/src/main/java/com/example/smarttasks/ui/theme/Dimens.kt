@@ -11,8 +11,13 @@ val PaddingSmall = 7.dp
 val CornerRadius = 5.dp
 val CardHeightMin = 80.dp
 val LogoOffset = (-120).dp
+
 val SpacerLarge = 40.dp
 val SpacerExtraLarge = 60.dp
 
+val TextSmall = 10.sp
+val TextMedium = 12.sp
+val TextLarge = 15.sp
 val TitleExtraLarge = 18.sp
 val Headline = 28.sp
+val DescriptionLineHeight = 14.sp

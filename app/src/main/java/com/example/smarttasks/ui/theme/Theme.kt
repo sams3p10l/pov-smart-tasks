@@ -19,7 +19,8 @@ private val AppColorScheme = lightColorScheme(
     onSecondary = White,
     onTertiary = White,
     onBackground = White,
-    onSurface = Black
+    onSurface = Black,
+    outline = PaleYellow
 )
 
 @Composable

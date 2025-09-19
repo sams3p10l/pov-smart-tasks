@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.smarttasks.R
@@ -47,7 +48,7 @@ fun SplashScreen(
         }
         Image(
             painter = painterResource(id = R.drawable.logo),
-            contentDescription = "App logo",
+            contentDescription = stringResource(R.string.app_logo_desc),
             contentScale = FixedScale(IMAGE_SCALE_FACTOR),
             modifier = Modifier
                 .align(Alignment.Center)
@@ -62,7 +63,7 @@ fun SplashScreen(
         }
         Image(
             painter = painterResource(id = R.drawable.intro_illustration),
-            contentDescription = "Illustration",
+            contentDescription = stringResource(R.string.illustration_desc),
             contentScale = FixedScale(IMAGE_SCALE_FACTOR),
             modifier = Modifier
                 .align(Alignment.BottomCenter)

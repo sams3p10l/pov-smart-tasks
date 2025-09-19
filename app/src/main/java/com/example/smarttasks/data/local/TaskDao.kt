@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TaskDao {
     @Query("SELECT * FROM tasks WHERE id = :id")
-    fun getTaskById(id: String): Flow<TaskEntity>
+    fun getTaskById(id: String): Flow<TaskEntity?>
 
     @Query("SELECT * FROM tasks WHERE targetDate = :date")
     fun getTasksByDate(date: String): Flow<List<TaskEntity>>

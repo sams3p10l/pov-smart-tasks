@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface TaskRepository {
     fun getTasksByDate(date: String): Flow<List<Task>>
 
-    fun getTaskById(id: String): Flow<Task>
+    fun getTaskById(id: String): Flow<Task?>
 
     suspend fun updateTask(updatedTask: Task)
 

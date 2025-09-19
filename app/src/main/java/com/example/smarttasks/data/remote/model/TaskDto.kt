@@ -1,15 +1,12 @@
 package com.example.smarttasks.data.remote.model
 
-import com.example.smarttasks.data.local.model.TaskEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class TaskResponseDto(
-    private val tasks: List<TaskDto>
-) {
-    fun get() = tasks
-}
+    val tasks: List<TaskDto>
+)
 
 /**
  * Data class for serialization of task Json object into data model.
@@ -23,13 +20,4 @@ data class TaskDto(
     @SerialName("Description") val description: String? = null,
     @SerialName("TargetDate") val targetDate: String,
     @SerialName("DueDate") val dueDate: String? = null,
-)
-
-fun TaskDto.toEntity() = TaskEntity(
-    id = id,
-    priority = priority,
-    title = title,
-    description = description,
-    targetDate = targetDate,
-    dueDate = dueDate
 )

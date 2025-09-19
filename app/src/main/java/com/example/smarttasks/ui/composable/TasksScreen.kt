@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.smarttasks.R
@@ -38,7 +40,6 @@ import com.example.smarttasks.ui.theme.PaddingExtraLarge
 import com.example.smarttasks.ui.theme.PaddingLarge
 import com.example.smarttasks.ui.theme.PaddingMedium
 import com.example.smarttasks.ui.theme.PaddingSmall
-import com.example.smarttasks.ui.theme.PaleYellow
 import com.example.smarttasks.ui.theme.SmartTasksTheme
 import com.example.smarttasks.ui.theme.SpacerExtraLarge
 import com.example.smarttasks.ui.theme.SpacerLarge
@@ -68,7 +69,7 @@ fun TasksScreen(
         ) {
             Image(
                 painterResource(R.drawable.arrow_left),
-                contentDescription = "Arrow to the left",
+                contentDescription = stringResource(R.string.arrow_left_desc),
                 modifier = Modifier.clickable { viewModel.decrementDate() }
             )
             Text(
@@ -79,17 +80,17 @@ fun TasksScreen(
             )
             Image(
                 painter = painterResource(R.drawable.arrow_right),
-                contentDescription = "Arrow to the right",
+                contentDescription = stringResource(R.string.arrow_right_desc),
                 modifier = Modifier.clickable { viewModel.incrementDate() }
             )
         }
         Spacer(Modifier.height(PaddingExtraLarge))
         if (data.tasks.isNotEmpty()) {
             LazyColumn {
-                items(data.tasks.size) {
+                items(items = data.tasks, key = { it.id }) { task ->
                     TaskCard(
-                        uiData = data.tasks[it],
-                        onClick = { onCardClick(data.tasks[it].id) }
+                        uiData = task,
+                        onClick = { onCardClick(task.id) }
                     )
                     Spacer(Modifier.height(PaddingMedium))
                 }
@@ -98,11 +99,11 @@ fun TasksScreen(
             Spacer(Modifier.height(SpacerExtraLarge))
             Image(
                 painter = painterResource(R.drawable.empty_screen),
-                contentDescription = "Illustration",
+                contentDescription = stringResource(R.string.illustration_desc),
             )
             Spacer(Modifier.height(SpacerLarge))
             Text(
-                text = "No tasks for ${data.date.lowercaseIfNotDate()}!",
+                text = stringResource(R.string.empty_tasks, data.date.lowercaseIfNotDate()),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = Headline
@@ -143,12 +144,12 @@ fun TaskCard(
                             .padding(start = PaddingLarge),
                         painter = painterResource(it),
                         contentScale = FixedScale(0.25f),
-                        contentDescription = "Task status icon"
+                        contentDescription = stringResource(R.string.task_status_icon_desc)
                     )
                 }
             }
             Spacer(Modifier.height(PaddingSmall))
-            HorizontalDivider(color = PaleYellow)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
             Spacer(Modifier.height(PaddingMedium))
             RowDueDate(
                 dueDate = uiData.dueDate,
@@ -170,12 +171,12 @@ fun RowDueDate(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "Due date",
+            text = stringResource(R.string.due_date_label),
             style = MaterialTheme.typography.bodyMedium
         )
         if (daysLeft.isNotNegative()) {
             Text(
-                text = "Days left",
+                text = stringResource(R.string.days_left_label),
                 style = MaterialTheme.typography.bodyMedium
             )
         }

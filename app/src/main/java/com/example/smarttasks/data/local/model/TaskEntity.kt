@@ -2,12 +2,9 @@ package com.example.smarttasks.data.local.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.smarttasks.domain.model.Task
 import com.example.smarttasks.domain.model.TaskStatus
-import java.time.LocalDate
-import kotlin.time.ExperimentalTime
 
-@Entity("tasks")
+@Entity(tableName = "tasks")
 data class TaskEntity(
     @PrimaryKey val id: String,
     val title: String,
@@ -17,27 +14,4 @@ data class TaskEntity(
     val dueDate: String?,
     val status: TaskStatus = TaskStatus.UNRESOLVED,
     val comment: String? = null
-)
-
-@OptIn(ExperimentalTime::class)
-fun TaskEntity.toDomain() = Task(
-    id = id,
-    priority = priority,
-    title = title,
-    description = description,
-    targetDate = LocalDate.parse(targetDate),
-    dueDate = dueDate?.let { LocalDate.parse(it) },
-    status = status,
-    comment = comment
-)
-
-fun Task.toEntity() = TaskEntity(
-    id = id,
-    priority = priority,
-    title = title,
-    description = description,
-    targetDate = targetDate.toString(),
-    dueDate = dueDate.toString(),
-    status = status,
-    comment = comment
 )

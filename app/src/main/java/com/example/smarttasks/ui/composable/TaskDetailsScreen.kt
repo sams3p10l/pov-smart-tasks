@@ -16,15 +16,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -39,23 +36,23 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.smarttasks.R
 import com.example.smarttasks.domain.model.TaskStatus
 import com.example.smarttasks.ui.model.TaskDetailsUiModel
 import com.example.smarttasks.ui.theme.CornerRadius
+import com.example.smarttasks.ui.theme.DescriptionLineHeight
 import com.example.smarttasks.ui.theme.Headline
 import com.example.smarttasks.ui.theme.PaddingLarge
 import com.example.smarttasks.ui.theme.PaddingMedium
 import com.example.smarttasks.ui.theme.PaddingSmall
-import com.example.smarttasks.ui.theme.PaleYellow
 import com.example.smarttasks.ui.theme.SpacerExtraLarge
 import com.example.smarttasks.ui.theme.SpacerLarge
 import com.example.smarttasks.ui.theme.TitleExtraLarge
@@ -123,13 +120,13 @@ fun TaskDetailsScreen(
         ) {
             Image(
                 painterResource(R.drawable.arrow_left),
-                contentDescription = "Arrow to the left",
+                contentDescription = stringResource(R.string.arrow_left_desc),
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .clickable(onClick = onBack)
             )
             Text(
-                text = "Task Detail",
+                text = stringResource(R.string.task_detail_title),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = TitleExtraLarge,
@@ -138,12 +135,14 @@ fun TaskDetailsScreen(
         }
         Spacer(Modifier.height(SpacerLarge))
         if (data != null) {
+            val statusUi = resolveStatusUi(data.status)
+
             Box(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Image(
                     painter = painterResource(R.drawable.task_details),
-                    contentDescription = "Background illustration",
+                    contentDescription = stringResource(R.string.task_detail_illustration_desc),
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -159,46 +158,46 @@ fun TaskDetailsScreen(
                 ) {
                     AutoResizeTitle(
                         text = data.title,
-                        color = data.accentColor,
+                        color = statusUi.accentColor,
                         style = MaterialTheme.typography.titleLarge,
                         initialFontSize = Headline,
                         minFontSize = TitleExtraLarge
                     )
                     Spacer(Modifier.height(PaddingMedium))
-                    HorizontalDivider(color = PaleYellow)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                     Spacer(Modifier.height(PaddingMedium))
                     RowDueDate(
                         dueDate = data.dueDate,
                         daysLeft = data.daysLeft,
-                        accentColor = data.accentColor
+                        accentColor = statusUi.accentColor
                     )
                     Spacer(Modifier.height(PaddingMedium))
-                    HorizontalDivider(color = PaleYellow)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                     Spacer(Modifier.height(PaddingMedium))
                     Text(
                         text = data.description,
                         style = MaterialTheme.typography.bodyLarge,
-                        lineHeight = 14.sp,
+                        lineHeight = DescriptionLineHeight,
                     )
                     Spacer(Modifier.height(PaddingMedium))
-                    HorizontalDivider(color = PaleYellow)
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline)
                     if (data.comment.isNotEmpty()) {
                         Spacer(Modifier.height(PaddingMedium))
                         Text(
                             text = buildAnnotatedString {
                                 withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
-                                    append("Comment: ")
+                                    append(stringResource(R.string.comment_prefix))
                                 }
-                                append(data.comment)
+                                append(" ${data.comment}")
                             },
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
                     Spacer(Modifier.weight(0.5f))
                     Text(
-                        text = data.statusText,
+                        text = stringResource(statusUi.textRes),
                         style = MaterialTheme.typography.titleLarge,
-                        color = data.statusTextColor
+                        color = statusUi.textColor
                     )
                 }
             }
@@ -210,7 +209,7 @@ fun TaskDetailsScreen(
                         horizontalArrangement = Arrangement.spacedBy(PaddingSmall)
                     ) {
                         ResolveButton(
-                            text = "Resolve",
+                            text = stringResource(R.string.resolve_button),
                             color = MaterialTheme.colorScheme.tertiary
                         ) {
                             if (data.comment.isEmpty()) {
@@ -220,7 +219,7 @@ fun TaskDetailsScreen(
                             }
                         }
                         ResolveButton(
-                            text = "Can't resolve",
+                            text = stringResource(R.string.cant_resolve_button),
                             color = MaterialTheme.colorScheme.secondary
                         ) {
                             if (data.comment.isEmpty()) {
@@ -313,89 +312,33 @@ private fun TaskStatusImage(
     Spacer(Modifier.height(SpacerLarge))
     Image(
         painter = painterResource(drawable),
-        contentDescription = "Task status symbol"
+        contentDescription = stringResource(R.string.task_status_symbol_desc)
     )
 }
 
-@Composable
-private fun QuestionDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = { onDismiss() },
-        text = {
-            Text(
-                text = "Do you want to leave a comment?",
-                style = MaterialTheme.typography.bodyLarge
-            )
-        },
-        confirmButton = {
-            TextButton(
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.secondary
-                ),
-                onClick = { onConfirm() }
-            ) {
-                Text("Yes")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.secondary
-                ),
-                onClick = { onDismiss() }
-            ) {
-                Text("No")
-            }
-        }
-    )
-}
+private data class StatusUi(
+    val textRes: Int,
+    val textColor: Color,
+    val accentColor: Color
+)
 
 @Composable
-private fun CommentDialog(
-    value: String,
-    onValueChange: (String) -> Unit,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = { onDismiss() },
-        text = {
-            Column {
-                Text(
-                    text = "Leave a comment here:",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Spacer(Modifier.height(PaddingSmall))
-                TextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    singleLine = false,
-                    maxLines = 4
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.secondary
-                ),
-                onClick = onConfirm
-            ) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.secondary
-                ),
-                onClick = onDismiss
-            ) {
-                Text("Cancel")
-            }
-        }
-    )
+private fun resolveStatusUi(status: TaskStatus): StatusUi {
+    return when (status) {
+        TaskStatus.RESOLVED -> StatusUi(
+            textRes = R.string.status_resolved,
+            textColor = MaterialTheme.colorScheme.tertiary,
+            accentColor = MaterialTheme.colorScheme.tertiary
+        )
+        TaskStatus.UNRESOLVED -> StatusUi(
+            textRes = R.string.status_unresolved,
+            textColor = MaterialTheme.colorScheme.primary,
+            accentColor = MaterialTheme.colorScheme.secondary
+        )
+        TaskStatus.CANT_RESOLVE -> StatusUi(
+            textRes = R.string.status_unresolved,
+            textColor = MaterialTheme.colorScheme.secondary,
+            accentColor = MaterialTheme.colorScheme.secondary
+        )
+    }
 }

@@ -6,7 +6,7 @@ import com.example.smarttasks.domain.usecase.FetchTasksUseCase
 import com.example.smarttasks.ui.model.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,7 +15,7 @@ class MainViewModel @Inject constructor(
     fetchTasksUseCase: FetchTasksUseCase
 ) : ViewModel() {
     private val _uiState: MutableStateFlow<Screen> = MutableStateFlow(Screen.Splash)
-    val uiState: StateFlow<Screen> = _uiState
+    val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {

@@ -8,7 +8,7 @@ import javax.inject.Inject
 class GetTaskByIdUseCase @Inject constructor(
     private val repository: TaskRepository
 ) {
-    operator fun invoke(id: String): Flow<Task> {
+    operator fun invoke(id: String): Flow<Task?> {
         return repository.getTaskById(id)
     }
 }

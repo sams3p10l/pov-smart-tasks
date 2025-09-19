@@ -1,3 +1,41 @@
 <resources>
     <string name="app_name">Smart Tasks</string>
+    <string name="app_logo_desc">App logo</string>
+
+    <!-- Navigation arrows -->
+    <string name="arrow_left_desc">Arrow to the left</string>
+    <string name="arrow_right_desc">Arrow to the right</string>
+
+    <!-- Empty state -->
+    <string name="empty_tasks">No tasks for %1$s!</string>
+    <string name="illustration_desc">Illustration</string>
+
+    <!-- Task card -->
+    <string name="due_date_label">Due date</string>
+    <string name="days_left_label">Days left</string>
+    <string name="task_status_icon_desc">Task status icon</string>
+
+    <!-- Task detail screen -->
+    <string name="task_detail_title">Task Detail</string>
+    <string name="task_detail_illustration_desc">Background illustration</string>
+
+    <!-- Status texts -->
+    <string name="status_unresolved">Unresolved</string>
+    <string name="status_resolved">Resolved</string>
+
+    <!-- Resolve buttons -->
+    <string name="resolve_button">Resolve</string>
+    <string name="cant_resolve_button">Can\'t resolve</string>
+    <string name="task_status_symbol_desc">Task status symbol</string>
+
+    <!-- Comment section -->
+    <string name="comment_prefix">Comment:</string>
+    <string name="leave_comment_prompt">Do you want to leave a comment?</string>
+    <string name="leave_comment_label">Leave a comment here:</string>
+
+    <!-- Dialog actions -->
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
+    <string name="dialog_save">Save</string>
+    <string name="dialog_cancel">Cancel</string>
 </resources>

@@ -23,6 +23,7 @@ object DatabaseModule {
     }
 
     @Provides
+    @Singleton
     fun provideTaskDao(db: AppDatabase): TaskDao = db.taskDao()
 }
 
