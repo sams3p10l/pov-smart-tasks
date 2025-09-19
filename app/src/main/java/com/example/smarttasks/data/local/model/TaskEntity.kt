@@ -11,7 +11,7 @@ import kotlin.time.ExperimentalTime
 data class TaskEntity(
     @PrimaryKey val id: String,
     val title: String,
-    val description: String,
+    val description: String?,
     val priority: Int,
     val targetDate: String,
     val dueDate: String?,
@@ -27,5 +27,17 @@ fun TaskEntity.toDomain() = Task(
     description = description,
     targetDate = LocalDate.parse(targetDate),
     dueDate = dueDate?.let { LocalDate.parse(it) },
-    //todo status, comment
+    status = status,
+    comment = comment
+)
+
+fun Task.toEntity() = TaskEntity(
+    id = id,
+    priority = priority,
+    title = title,
+    description = description,
+    targetDate = targetDate.toString(),
+    dueDate = dueDate.toString(),
+    status = status,
+    comment = comment
 )

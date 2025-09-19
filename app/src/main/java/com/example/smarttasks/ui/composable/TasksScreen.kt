@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,12 +25,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.smarttasks.R
 import com.example.smarttasks.ui.model.TaskScreenUiModel
-import com.example.smarttasks.ui.model.TaskUiModel
 import com.example.smarttasks.ui.theme.CardHeightMin
 import com.example.smarttasks.ui.theme.CornerRadius
 import com.example.smarttasks.ui.theme.Headline
@@ -49,7 +50,7 @@ import com.example.smarttasks.ui.viewmodel.TasksViewModel
 @Composable
 fun TasksScreen(
     modifier: Modifier = Modifier,
-    onCardClick: () -> Unit,
+    onCardClick: (String) -> Unit,
 ) {
     val viewModel: TasksViewModel = hiltViewModel()
     val uiState: State<TaskScreenUiModel> = viewModel.uiState.collectAsState()
@@ -90,7 +91,7 @@ fun TasksScreen(
                 items(data.tasks.size) {
                     TaskCard(
                         uiData = data.tasks[it],
-                        onClick = onCardClick
+                        onClick = { onCardClick(data.tasks[it].id) }
                     )
                     Spacer(Modifier.height(PaddingMedium))
                 }
@@ -114,7 +115,7 @@ fun TasksScreen(
 
 @Composable
 fun TaskCard(
-    uiData: TaskUiModel,
+    uiData: TaskScreenUiModel.TaskUi,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
@@ -128,11 +129,26 @@ fun TaskCard(
         Column(
             modifier = Modifier.padding(PaddingMedium)
         ) {
-            Text(
-                text = uiData.title,
-                style = MaterialTheme.typography.titleLarge,
-                color = Red
-            )
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = uiData.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Red,
+                    modifier = Modifier.align(Alignment.CenterStart)
+                )
+                uiData.statusIconDrawableRes?.let {
+                    Image(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(start = PaddingLarge),
+                        painter = painterResource(it),
+                        contentScale = FixedScale(0.25f),
+                        contentDescription = "Task status icon"
+                    )
+                }
+            }
             Spacer(Modifier.height(PaddingSmall))
             HorizontalDivider() //todo set correct color
             Spacer(Modifier.height(PaddingMedium))
@@ -191,11 +207,13 @@ fun RowDueDate(
 fun TaskCardPreview() {
     SmartTasksTheme {
         TaskCard(
-            TaskUiModel(
+            TaskScreenUiModel.TaskUi(
+                id = "id123",
                 "Task Title",
                 "",
                 dueDate = "Apr 23 2016",
-                daysLeft = "12"
+                daysLeft = "12",
+                statusIconDrawableRes = R.drawable.btn_resolved
             ),
             onClick = {}
         )

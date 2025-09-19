@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.smarttasks.domain.model.Task
 import com.example.smarttasks.domain.usecase.GetTasksByDateUseCase
 import com.example.smarttasks.ui.extension.prettify
+import com.example.smarttasks.ui.extension.toUiModel
 import com.example.smarttasks.ui.model.TaskScreenUiModel
-import com.example.smarttasks.ui.model.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow

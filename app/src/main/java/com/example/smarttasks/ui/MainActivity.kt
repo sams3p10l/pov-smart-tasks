@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SmartTasksTheme {
-                val screen by mainViewModel.currentScreen.collectAsState()
+                val screen by mainViewModel.uiState.collectAsState()
 
                 AnimatedContent(
                     targetState = screen,
@@ -45,11 +45,12 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                         Screen.Tasks -> TasksScreen(
-                            onCardClick = {
-                                mainViewModel.navigateTo(Screen.TaskDetails)
+                            onCardClick = { taskId ->
+                                mainViewModel.navigateTo(Screen.TaskDetails(taskId))
                             }
                         )
-                        Screen.TaskDetails -> TaskDetailsScreen(
+                        is Screen.TaskDetails -> TaskDetailsScreen(
+                            taskId = screen.id,
                             onBack = {
                                 mainViewModel.navigateTo(Screen.Tasks)
                             }

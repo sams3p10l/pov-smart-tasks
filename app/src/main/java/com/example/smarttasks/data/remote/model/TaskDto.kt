@@ -29,7 +29,7 @@ fun TaskDto.toEntity() = TaskEntity(
     id = id,
     priority = priority,
     title = title,
-    description = description ?: "",
+    description = description,
     targetDate = targetDate,
     dueDate = dueDate
 )

@@ -2,6 +2,7 @@ package com.example.smarttasks.data.repository
 
 import com.example.smarttasks.data.local.TaskDao
 import com.example.smarttasks.data.local.model.toDomain
+import com.example.smarttasks.data.local.model.toEntity
 import com.example.smarttasks.data.remote.TaskApi
 import com.example.smarttasks.data.remote.model.toEntity
 import com.example.smarttasks.domain.model.Task
@@ -24,5 +25,13 @@ class TaskRepositoryImpl @Inject constructor(
 
     override fun getTasksByDate(date: String): Flow<List<Task>> {
         return dao.getTasksByDate(date).map { entities -> entities.map { it.toDomain() } }
+    }
+
+    override fun getTaskById(id: String): Flow<Task> {
+        return dao.getTaskById(id).map { it.toDomain() }
+    }
+
+    override suspend fun updateTask(updatedTask: Task) {
+        dao.updateTask(updatedTask.toEntity())
     }
 }

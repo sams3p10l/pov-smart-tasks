@@ -11,6 +11,16 @@ val Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 10.sp
     ),
+    bodyLarge = TextStyle(
+        fontFamily = AmsiPro,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = AmsiPro,
+        fontWeight = FontWeight.Bold,
+        fontSize = 12.sp
+    ),
     titleLarge = TextStyle(
         fontFamily = AmsiPro,
         fontWeight = FontWeight.Bold,

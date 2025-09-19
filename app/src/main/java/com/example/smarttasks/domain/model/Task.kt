@@ -11,4 +11,6 @@ data class Task(
     val description: String? = null,
     val targetDate: LocalDate,
     val dueDate: LocalDate? = null,
+    val status: TaskStatus,
+    val comment: String? = null
 )

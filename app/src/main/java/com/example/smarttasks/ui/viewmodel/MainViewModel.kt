@@ -14,8 +14,8 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     fetchTasksUseCase: FetchTasksUseCase
 ) : ViewModel() {
-    private val _currentScreen: MutableStateFlow<Screen> = MutableStateFlow(Screen.Splash)
-    val currentScreen: StateFlow<Screen> = _currentScreen
+    private val _uiState: MutableStateFlow<Screen> = MutableStateFlow(Screen.Splash)
+    val uiState: StateFlow<Screen> = _uiState
 
     init {
         viewModelScope.launch {
@@ -24,6 +24,6 @@ class MainViewModel @Inject constructor(
     }
 
     fun navigateTo(screen: Screen) {
-        _currentScreen.value = screen
+        _uiState.value = screen
     }
 }
