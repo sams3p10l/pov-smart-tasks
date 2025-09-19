@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.smarttasks.domain.model.Task
 import com.example.smarttasks.domain.usecase.GetTasksByDateUseCase
 import com.example.smarttasks.ui.model.TaskScreenUiModel
+import com.example.smarttasks.ui.model.UiState
 import com.example.smarttasks.ui.util.prettify
 import com.example.smarttasks.ui.util.toUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,6 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -27,12 +29,12 @@ class TasksViewModel @Inject constructor(
     private val currentDate = LocalDate.now()
     private val targetDate = MutableStateFlow<LocalDate>(currentDate)
 
-    val uiState: StateFlow<TaskScreenUiModel> =
+    val uiState: StateFlow<UiState<TaskScreenUiModel>> =
         targetDate
             .flatMapLatest { date ->
                 getTasksByDateUseCase(date).map { tasks -> date to tasks }
             }
-            .map { (date, tasks) ->
+            .map<Pair<LocalDate, List<Task>>, UiState<TaskScreenUiModel>> { (date, tasks) ->
                 val mapped = tasks
                     .sortedWith(compareByDescending<Task> {
                         it.priority
@@ -41,15 +43,18 @@ class TasksViewModel @Inject constructor(
                     })
                     .map { it.toUiModel() }
 
-                TaskScreenUiModel(
-                    date = formatDate(date),
-                    tasks = mapped
+                UiState.Success(
+                    TaskScreenUiModel(
+                        date = formatDate(date),
+                        tasks = mapped
+                    )
                 )
             }
+            .catch { emit(UiState.Error(it.message ?: "Unknown error")) }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.Lazily,
-                initialValue = TaskScreenUiModel("", emptyList())
+                initialValue = UiState.Loading
             )
 
     fun incrementDate() {

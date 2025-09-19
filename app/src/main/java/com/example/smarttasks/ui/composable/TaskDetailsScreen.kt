@@ -1,5 +1,6 @@
 package com.example.smarttasks.ui.composable
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -47,6 +49,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.smarttasks.R
 import com.example.smarttasks.domain.model.TaskStatus
 import com.example.smarttasks.ui.model.TaskDetailsUiModel
+import com.example.smarttasks.ui.model.UiState
 import com.example.smarttasks.ui.theme.CornerRadius
 import com.example.smarttasks.ui.theme.DescriptionLineHeight
 import com.example.smarttasks.ui.theme.Headline
@@ -65,8 +68,8 @@ fun TaskDetailsScreen(
     onBack: () -> Unit
 ) {
     val viewModel: TaskDetailsViewModel = hiltViewModel()
-    val uiState: State<TaskDetailsUiModel?> = viewModel.uiState.collectAsState()
-    val data = uiState.value
+    val uiState: State<UiState<TaskDetailsUiModel>> = viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     BackHandler {
         onBack()
@@ -76,6 +79,41 @@ fun TaskDetailsScreen(
         viewModel.setTaskId(taskId)
     }
 
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        when (val uiData = uiState.value) {
+            is UiState.Loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            is UiState.Success -> {
+                TaskDetailsContent(
+                    uiData = uiData.data,
+                    onBack = onBack,
+                    updateTask = { status, comment ->
+                        viewModel.updateTask(taskId, status, comment)
+                    }
+                )
+            }
+            is UiState.Error -> {
+                LaunchedEffect(uiData.message) {
+                    Toast.makeText(context, uiData.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TaskDetailsContent(
+    uiData: TaskDetailsUiModel,
+    modifier: Modifier = Modifier,
+    updateTask: (TaskStatus, String?) -> Unit,
+    onBack: () -> Unit
+) {
     var showQuestionDialog by remember { mutableStateOf<TaskStatus?>(null) }
     var showCommentDialog by remember { mutableStateOf<TaskStatus?>(null) }
     var commentText by remember { mutableStateOf("") }
@@ -94,7 +132,7 @@ fun TaskDetailsScreen(
                     showQuestionDialog = null
                 },
                 onDismiss = {
-                    viewModel.updateTask(taskId, showQuestionDialog!!)
+                    updateTask(showQuestionDialog!!, null)
                     showQuestionDialog = null
                 }
             )
@@ -104,7 +142,7 @@ fun TaskDetailsScreen(
                 value = commentText,
                 onValueChange = { commentText = it },
                 onConfirm = {
-                    viewModel.updateTask(taskId, showCommentDialog!!, commentText)
+                    updateTask(showCommentDialog!!, commentText)
                     showCommentDialog = null
                     commentText = ""
                 },
@@ -134,115 +172,109 @@ fun TaskDetailsScreen(
             )
         }
         Spacer(Modifier.height(SpacerLarge))
-        if (data != null) {
-            val statusUi = resolveStatusUi(data.status)
 
-            Box(
+        val statusUi = resolveStatusUi(uiData.status)
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Image(
+                painter = painterResource(R.drawable.task_details),
+                contentDescription = stringResource(R.string.task_detail_illustration_desc),
+                contentScale = ContentScale.FillWidth,
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.task_details),
-                    contentDescription = stringResource(R.string.task_detail_illustration_desc),
-                    contentScale = ContentScale.FillWidth,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Column(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .padding(
-                            top = SpacerExtraLarge,
-                            start = PaddingMedium,
-                            end = PaddingMedium,
-                            bottom = PaddingMedium
-                        )
-                ) {
-                    AutoResizeTitle(
-                        text = data.title,
-                        color = statusUi.accentColor,
-                        style = MaterialTheme.typography.titleLarge,
-                        initialFontSize = Headline,
-                        minFontSize = TitleExtraLarge
-                    )
-                    Spacer(Modifier.height(PaddingMedium))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-                    Spacer(Modifier.height(PaddingMedium))
-                    RowDueDate(
-                        dueDate = data.dueDate,
-                        daysLeft = data.daysLeft,
-                        accentColor = statusUi.accentColor
-                    )
-                    Spacer(Modifier.height(PaddingMedium))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-                    Spacer(Modifier.height(PaddingMedium))
-                    Text(
-                        text = data.description,
-                        style = MaterialTheme.typography.bodyLarge,
-                        lineHeight = DescriptionLineHeight,
-                    )
-                    Spacer(Modifier.height(PaddingMedium))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-                    if (data.comment.isNotEmpty()) {
-                        Spacer(Modifier.height(PaddingMedium))
-                        Text(
-                            text = buildAnnotatedString {
-                                withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
-                                    append(stringResource(R.string.comment_prefix))
-                                }
-                                append(" ${data.comment}")
-                            },
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
-                    Spacer(Modifier.weight(0.5f))
-                    Text(
-                        text = stringResource(statusUi.textRes),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = statusUi.textColor
-                    )
-                }
-            }
-            Spacer(Modifier.height(PaddingMedium))
-            when (data.status) {
-                TaskStatus.UNRESOLVED -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(PaddingSmall)
-                    ) {
-                        ResolveButton(
-                            text = stringResource(R.string.resolve_button),
-                            color = MaterialTheme.colorScheme.tertiary
-                        ) {
-                            if (data.comment.isEmpty()) {
-                                showQuestionDialog = TaskStatus.RESOLVED
-                            } else {
-                                viewModel.updateTask(taskId, TaskStatus.RESOLVED)
-                            }
-                        }
-                        ResolveButton(
-                            text = stringResource(R.string.cant_resolve_button),
-                            color = MaterialTheme.colorScheme.secondary
-                        ) {
-                            if (data.comment.isEmpty()) {
-                                showQuestionDialog = TaskStatus.CANT_RESOLVE
-                            } else {
-                                viewModel.updateTask(taskId, TaskStatus.CANT_RESOLVE)
-                            }
-                        }
-                    }
-                }
-
-                TaskStatus.RESOLVED -> {
-                    TaskStatusImage(R.drawable.sign_resolved)
-                }
-
-                TaskStatus.CANT_RESOLVE -> {
-                    TaskStatusImage(R.drawable.unresolved_sign)
-                }
-            }
-        } else {
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.onBackground
             )
+            Column(
+                modifier = Modifier
+                    .matchParentSize()
+                    .padding(
+                        top = SpacerExtraLarge,
+                        start = PaddingMedium,
+                        end = PaddingMedium,
+                        bottom = PaddingMedium
+                    )
+            ) {
+                AutoResizeTitle(
+                    text = uiData.title,
+                    color = statusUi.accentColor,
+                    style = MaterialTheme.typography.titleLarge,
+                    initialFontSize = Headline,
+                    minFontSize = TitleExtraLarge
+                )
+                Spacer(Modifier.height(PaddingMedium))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                Spacer(Modifier.height(PaddingMedium))
+                RowDueDate(
+                    dueDate = uiData.dueDate,
+                    daysLeft = uiData.daysLeft,
+                    accentColor = statusUi.accentColor
+                )
+                Spacer(Modifier.height(PaddingMedium))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                Spacer(Modifier.height(PaddingMedium))
+                Text(
+                    text = uiData.description,
+                    style = MaterialTheme.typography.bodyLarge,
+                    lineHeight = DescriptionLineHeight,
+                )
+                Spacer(Modifier.height(PaddingMedium))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+                if (uiData.comment.isNotEmpty()) {
+                    Spacer(Modifier.height(PaddingMedium))
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
+                                append(stringResource(R.string.comment_prefix))
+                            }
+                            append(" ${uiData.comment}")
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                Spacer(Modifier.weight(0.5f))
+                Text(
+                    text = stringResource(statusUi.textRes),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = statusUi.textColor
+                )
+            }
+        }
+        Spacer(Modifier.height(PaddingMedium))
+        when (uiData.status) {
+            TaskStatus.UNRESOLVED -> {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(PaddingSmall)
+                ) {
+                    ResolveButton(
+                        text = stringResource(R.string.resolve_button),
+                        color = MaterialTheme.colorScheme.tertiary
+                    ) {
+                        if (uiData.comment.isEmpty()) {
+                            showQuestionDialog = TaskStatus.RESOLVED
+                        } else {
+                            updateTask(TaskStatus.RESOLVED, null)
+                        }
+                    }
+                    ResolveButton(
+                        text = stringResource(R.string.cant_resolve_button),
+                        color = MaterialTheme.colorScheme.secondary
+                    ) {
+                        if (uiData.comment.isEmpty()) {
+                            showQuestionDialog = TaskStatus.CANT_RESOLVE
+                        } else {
+                            updateTask(TaskStatus.CANT_RESOLVE, null)
+                        }
+                    }
+                }
+            }
+
+            TaskStatus.RESOLVED -> {
+                TaskStatusImage(R.drawable.sign_resolved)
+            }
+
+            TaskStatus.CANT_RESOLVE -> {
+                TaskStatusImage(R.drawable.unresolved_sign)
+            }
         }
     }
 }
@@ -283,7 +315,7 @@ private fun RowScope.ResolveButton(
     color: Color,
     onClick: () -> Unit
 ) {
-    val contentColor = when(color) {
+    val contentColor = when (color) {
         MaterialTheme.colorScheme.secondary -> MaterialTheme.colorScheme.onSecondary
         MaterialTheme.colorScheme.tertiary -> MaterialTheme.colorScheme.onTertiary
         else -> MaterialTheme.colorScheme.onPrimary
@@ -330,11 +362,13 @@ private fun resolveStatusUi(status: TaskStatus): StatusUi {
             textColor = MaterialTheme.colorScheme.tertiary,
             accentColor = MaterialTheme.colorScheme.tertiary
         )
+
         TaskStatus.UNRESOLVED -> StatusUi(
             textRes = R.string.status_unresolved,
             textColor = MaterialTheme.colorScheme.primary,
             accentColor = MaterialTheme.colorScheme.secondary
         )
+
         TaskStatus.CANT_RESOLVE -> StatusUi(
             textRes = R.string.status_unresolved,
             textColor = MaterialTheme.colorScheme.secondary,

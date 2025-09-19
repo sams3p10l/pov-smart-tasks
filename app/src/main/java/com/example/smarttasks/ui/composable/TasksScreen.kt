@@ -1,5 +1,6 @@
 package com.example.smarttasks.ui.composable
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,23 +17,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.FixedScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.smarttasks.R
 import com.example.smarttasks.ui.model.TaskScreenUiModel
+import com.example.smarttasks.ui.model.UiState
 import com.example.smarttasks.ui.theme.CardHeightMin
 import com.example.smarttasks.ui.theme.CornerRadius
 import com.example.smarttasks.ui.theme.Headline
@@ -52,9 +57,45 @@ fun TasksScreen(
     onCardClick: (String) -> Unit,
 ) {
     val viewModel: TasksViewModel = hiltViewModel()
-    val uiState: State<TaskScreenUiModel> = viewModel.uiState.collectAsState()
-    val data: TaskScreenUiModel = uiState.value
+    val uiState: State<UiState<TaskScreenUiModel>> = viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        when (val uiData = uiState.value) {
+            is UiState.Loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            is UiState.Success -> {
+                TasksList(
+                    uiData = uiData.data,
+                    onLeftArrowClick = viewModel::decrementDate,
+                    onRightArrowClick = viewModel::incrementDate,
+                    onCardClick = onCardClick,
+                    modifier = modifier
+                )
+            }
+            is UiState.Error -> {
+                LaunchedEffect(uiData.message) {
+                    Toast.makeText(context, uiData.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TasksList(
+    uiData: TaskScreenUiModel,
+    modifier: Modifier = Modifier,
+    onLeftArrowClick: () -> Unit,
+    onRightArrowClick: () -> Unit,
+    onCardClick: (String) -> Unit
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -70,10 +111,10 @@ fun TasksScreen(
             Image(
                 painterResource(R.drawable.arrow_left),
                 contentDescription = stringResource(R.string.arrow_left_desc),
-                modifier = Modifier.clickable { viewModel.decrementDate() }
+                modifier = Modifier.clickable { onLeftArrowClick() }
             )
             Text(
-                text = data.date,
+                text = uiData.date,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = TitleExtraLarge
@@ -81,13 +122,13 @@ fun TasksScreen(
             Image(
                 painter = painterResource(R.drawable.arrow_right),
                 contentDescription = stringResource(R.string.arrow_right_desc),
-                modifier = Modifier.clickable { viewModel.incrementDate() }
+                modifier = Modifier.clickable { onRightArrowClick() }
             )
         }
         Spacer(Modifier.height(PaddingExtraLarge))
-        if (data.tasks.isNotEmpty()) {
+        if (uiData.tasks.isNotEmpty()) {
             LazyColumn {
-                items(items = data.tasks, key = { it.id }) { task ->
+                items(items = uiData.tasks, key = { it.id }) { task ->
                     TaskCard(
                         uiData = task,
                         onClick = { onCardClick(task.id) }
@@ -103,7 +144,7 @@ fun TasksScreen(
             )
             Spacer(Modifier.height(SpacerLarge))
             Text(
-                text = stringResource(R.string.empty_tasks, data.date.lowercaseIfNotDate()),
+                text = stringResource(R.string.empty_tasks, uiData.date.lowercaseIfNotDate()),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = Headline
