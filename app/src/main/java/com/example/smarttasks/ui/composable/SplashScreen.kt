@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import com.example.smarttasks.R
 import com.example.smarttasks.ui.theme.LogoOffset
 import com.example.smarttasks.ui.theme.SmartTasksTheme
-import com.example.smarttasks.ui.theme.Yellow
 import kotlinx.coroutines.delay
 
 @Composable
@@ -38,7 +38,7 @@ fun SplashScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Yellow) //todo look into why MaterialTheme.background is not working
+            .background(MaterialTheme.colorScheme.background)
     ) {
         val firstAnimation by transition.animateFloat(
             transitionSpec = { tween(ANIMATION_DURATION) }

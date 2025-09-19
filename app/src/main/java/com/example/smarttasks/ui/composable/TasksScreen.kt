@@ -38,13 +38,11 @@ import com.example.smarttasks.ui.theme.PaddingExtraLarge
 import com.example.smarttasks.ui.theme.PaddingLarge
 import com.example.smarttasks.ui.theme.PaddingMedium
 import com.example.smarttasks.ui.theme.PaddingSmall
-import com.example.smarttasks.ui.theme.Red
+import com.example.smarttasks.ui.theme.PaleYellow
 import com.example.smarttasks.ui.theme.SmartTasksTheme
 import com.example.smarttasks.ui.theme.SpacerExtraLarge
 import com.example.smarttasks.ui.theme.SpacerLarge
 import com.example.smarttasks.ui.theme.TitleExtraLarge
-import com.example.smarttasks.ui.theme.White
-import com.example.smarttasks.ui.theme.Yellow
 import com.example.smarttasks.ui.viewmodel.TasksViewModel
 
 @Composable
@@ -59,7 +57,7 @@ fun TasksScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Yellow) //todo replace with MaterialTheme
+            .background(MaterialTheme.colorScheme.background)
             .padding(start = PaddingMedium, end = PaddingMedium, top = PaddingLarge),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -76,7 +74,7 @@ fun TasksScreen(
             Text(
                 text = data.date,
                 style = MaterialTheme.typography.titleLarge,
-                color = White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = TitleExtraLarge
             )
             Image(
@@ -106,7 +104,7 @@ fun TasksScreen(
             Text(
                 text = "No tasks for ${data.date.lowercaseIfNotDate()}!",
                 style = MaterialTheme.typography.titleLarge,
-                color = White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = Headline
             )
         }
@@ -135,7 +133,7 @@ fun TaskCard(
                 Text(
                     text = uiData.title,
                     style = MaterialTheme.typography.titleLarge,
-                    color = Red,
+                    color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.align(Alignment.CenterStart)
                 )
                 uiData.statusIconDrawableRes?.let {
@@ -150,12 +148,12 @@ fun TaskCard(
                 }
             }
             Spacer(Modifier.height(PaddingSmall))
-            HorizontalDivider() //todo set correct color
+            HorizontalDivider(color = PaleYellow)
             Spacer(Modifier.height(PaddingMedium))
             RowDueDate(
                 dueDate = uiData.dueDate,
                 daysLeft = uiData.daysLeft,
-                accentColor = Red
+                accentColor = MaterialTheme.colorScheme.secondary
             )
         }
     }

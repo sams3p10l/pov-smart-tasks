@@ -51,17 +51,14 @@ import com.example.smarttasks.R
 import com.example.smarttasks.domain.model.TaskStatus
 import com.example.smarttasks.ui.model.TaskDetailsUiModel
 import com.example.smarttasks.ui.theme.CornerRadius
-import com.example.smarttasks.ui.theme.Green
 import com.example.smarttasks.ui.theme.Headline
 import com.example.smarttasks.ui.theme.PaddingLarge
 import com.example.smarttasks.ui.theme.PaddingMedium
 import com.example.smarttasks.ui.theme.PaddingSmall
-import com.example.smarttasks.ui.theme.Red
+import com.example.smarttasks.ui.theme.PaleYellow
 import com.example.smarttasks.ui.theme.SpacerExtraLarge
 import com.example.smarttasks.ui.theme.SpacerLarge
 import com.example.smarttasks.ui.theme.TitleExtraLarge
-import com.example.smarttasks.ui.theme.White
-import com.example.smarttasks.ui.theme.Yellow
 import com.example.smarttasks.ui.viewmodel.TaskDetailsViewModel
 
 @Composable
@@ -89,7 +86,7 @@ fun TaskDetailsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Yellow) //todo replace with MaterialTheme
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = PaddingMedium, vertical = PaddingLarge),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -134,7 +131,7 @@ fun TaskDetailsScreen(
             Text(
                 text = "Task Detail",
                 style = MaterialTheme.typography.titleLarge,
-                color = White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = TitleExtraLarge,
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -168,7 +165,7 @@ fun TaskDetailsScreen(
                         minFontSize = TitleExtraLarge
                     )
                     Spacer(Modifier.height(PaddingMedium))
-                    HorizontalDivider() //todo set correct color
+                    HorizontalDivider(color = PaleYellow)
                     Spacer(Modifier.height(PaddingMedium))
                     RowDueDate(
                         dueDate = data.dueDate,
@@ -176,7 +173,7 @@ fun TaskDetailsScreen(
                         accentColor = data.accentColor
                     )
                     Spacer(Modifier.height(PaddingMedium))
-                    HorizontalDivider() //todo set correct color
+                    HorizontalDivider(color = PaleYellow)
                     Spacer(Modifier.height(PaddingMedium))
                     Text(
                         text = data.description,
@@ -184,7 +181,7 @@ fun TaskDetailsScreen(
                         lineHeight = 14.sp,
                     )
                     Spacer(Modifier.height(PaddingMedium))
-                    HorizontalDivider() //todo set correct color
+                    HorizontalDivider(color = PaleYellow)
                     if (data.comment.isNotEmpty()) {
                         Spacer(Modifier.height(PaddingMedium))
                         Text(
@@ -214,7 +211,7 @@ fun TaskDetailsScreen(
                     ) {
                         ResolveButton(
                             text = "Resolve",
-                            color = Green
+                            color = MaterialTheme.colorScheme.tertiary
                         ) {
                             if (data.comment.isEmpty()) {
                                 showQuestionDialog = TaskStatus.RESOLVED
@@ -224,7 +221,7 @@ fun TaskDetailsScreen(
                         }
                         ResolveButton(
                             text = "Can't resolve",
-                            color = Red
+                            color = MaterialTheme.colorScheme.secondary
                         ) {
                             if (data.comment.isEmpty()) {
                                 showQuestionDialog = TaskStatus.CANT_RESOLVE
@@ -245,7 +242,7 @@ fun TaskDetailsScreen(
             }
         } else {
             CircularProgressIndicator(
-                color = White
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
     }
@@ -287,12 +284,18 @@ private fun RowScope.ResolveButton(
     color: Color,
     onClick: () -> Unit
 ) {
+    val contentColor = when(color) {
+        MaterialTheme.colorScheme.secondary -> MaterialTheme.colorScheme.onSecondary
+        MaterialTheme.colorScheme.tertiary -> MaterialTheme.colorScheme.onTertiary
+        else -> MaterialTheme.colorScheme.onPrimary
+    }
+
     Button(
         modifier = Modifier.weight(1f),
         shape = RoundedCornerShape(CornerRadius),
         colors = ButtonDefaults.buttonColors(
             containerColor = color,
-            contentColor = White
+            contentColor = contentColor
         ),
         onClick = onClick,
     ) {
@@ -330,7 +333,7 @@ private fun QuestionDialog(
         confirmButton = {
             TextButton(
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = Red
+                    contentColor = MaterialTheme.colorScheme.secondary
                 ),
                 onClick = { onConfirm() }
             ) {
@@ -340,7 +343,7 @@ private fun QuestionDialog(
         dismissButton = {
             TextButton(
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = Red
+                    contentColor = MaterialTheme.colorScheme.secondary
                 ),
                 onClick = { onDismiss() }
             ) {
@@ -377,7 +380,7 @@ private fun CommentDialog(
         confirmButton = {
             TextButton(
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = Red
+                    contentColor = MaterialTheme.colorScheme.secondary
                 ),
                 onClick = onConfirm
             ) {
@@ -387,7 +390,7 @@ private fun CommentDialog(
         dismissButton = {
             TextButton(
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = Red
+                    contentColor = MaterialTheme.colorScheme.secondary
                 ),
                 onClick = onDismiss
             ) {
